@@ -81,7 +81,7 @@ void Hash::printResults() //prints the menu
   std::cout << "\nLinear" << std::setw(14) << std::right << '|';
   for(int i = 1; i < 11; i++)
   {
-    std::cout << std::right << std::setw(5) << "xxxx" << std::setw(2) << std::right << '|'; 
+    std::cout << std::right << std::setw(5) << linearHash(inputStream, i*1000, getTablesize()) << std::setw(2) << std::right << '|'; 
   }    
   std::cout << "\nQuadratic" << std::setw(11) << std::right << '|';
   for(int i = 1; i < 11; i++)
