@@ -3,40 +3,41 @@
 #include <time.h>
 #include <iomanip>
 
+//Hash class to run all the tests
 class Hash{
 private:
   const int tableSize = 10001; 
 public:
-  int* inputStream;
-  int getTablesize();
-  int linearHash(int*, int, int);
+  int* inputStream; //input stream is randomly generated in main
+  int getTablesize(); //getter function
+  int linearHash(int*, int, int); 
   int quadraticHash(int*, int, int);
-  int quadraticHash(int*, int, int, char);
+  int failsQuadraticHash(int*, int, int);
   int doubleHash(int*, int, int);  
-  int doubleHash(int*, int, int, char); 
+  int failsDoubleHash(int*, int, int); 
   void printResults();
-
 };
 
 int main(){
 
-  Hash hashObj; 
+  Hash hashObj; //creates Hash object
 
-  srand(time(NULL));
-  int inputStream[hashObj.getTablesize() - 1];
+  srand(time(NULL)); //seed rand
+  int inputStream[hashObj.getTablesize() - 1]; //array to hold random numbers
   for(int i = 0; i < hashObj.getTablesize() - 1; i++)
   {
-    inputStream[i] = rand(); 
+    inputStream[i] = rand(); //fill array 
   }
-  hashObj.inputStream = inputStream; 
-  hashObj.printResults();
+  hashObj.inputStream = inputStream; //pass to hash object
+  hashObj.printResults(); //print the results of the tests
 
   return 0; 
 }
-
+//Getter function
 int Hash::getTablesize(){
     return tableSize;
 }
+//double hashing function
 int Hash::doubleHash(int* input, int streamSize, int tableSize){
   int collisions = 0;
   int failures = 0; 
@@ -49,25 +50,24 @@ int Hash::doubleHash(int* input, int streamSize, int tableSize){
 
   for(int i = 0; i < streamSize; i++)
   {
-    int key = input[i] % tableSize;
-    int r = 9973 - (input[i] % 9973); 
-    inserted = false; 
-    do
+    int key = input[i] % tableSize; //set key
+    int r = 9973 - (input[i] % 9973); //set r value for double hash
+    inserted = false; //control bool
+    do //do while logic to execute insertion test until a open spot or failure
     {
-      if(hashTable[key] == -1)
+      if(hashTable[key] == -1) //if empty
       {
-        hashTable[key] = input[i];
+        hashTable[key] = input[i]; //insert it
         inserted = true;
       }
       else
       {
-        collisions++;
-        //key = (key + 1)%tableSize;
-        key = (key + r)%tableSize; 
-        if(input[i] % tableSize == key)
+        collisions++; 
+        key = (key + r)%tableSize; //go to next location
+        if(input[i] % tableSize == key)//if we get back to starting location
         {
           failures++;
-          inserted = true;
+          inserted = true; //fail and escape to prevent endless loop 
         }
       }
     }
@@ -75,7 +75,10 @@ int Hash::doubleHash(int* input, int streamSize, int tableSize){
   }
   return collisions;   
 }
-int Hash::doubleHash(int* input, int streamSize, int tableSize, char f){
+//failures function
+//most likely a better way to do this as my code is redundant but gets the job done
+//same logic as above see documentation there. Return value changes
+int Hash::failsDoubleHash(int* input, int streamSize, int tableSize){
   int collisions = 0;
   int failures = 0; 
   bool inserted; 
@@ -113,6 +116,7 @@ int Hash::doubleHash(int* input, int streamSize, int tableSize, char f){
   }
   return failures;   
 }
+//nearly identical as double hashing will denote differences
 int Hash::quadraticHash(int* input, int streamSize, int tableSize){
   int collisions = 0;
   int failures = 0; 
@@ -139,7 +143,7 @@ int Hash::quadraticHash(int* input, int streamSize, int tableSize){
       {
         collisions++;
         j++;
-        key = (key + (j*j))%tableSize;
+        key = (input[i]%tableSize + (j*j))%tableSize; //logic for quadratic hash
         if(input[i] % tableSize == key)
         {
           failures++;
@@ -151,7 +155,8 @@ int Hash::quadraticHash(int* input, int streamSize, int tableSize){
   }
   return collisions;   
 }
-int Hash::quadraticHash(int* input, int streamSize, int tableSize, char f){
+
+int Hash::failsQuadraticHash(int* input, int streamSize, int tableSize){
   int collisions = 0;
   int failures = 0; 
   bool inserted; 
@@ -177,7 +182,7 @@ int Hash::quadraticHash(int* input, int streamSize, int tableSize, char f){
       {
         collisions++;
         j++;
-        key = (key + (j*j))%tableSize;
+        key = (input[i]%tableSize + (j*j))%tableSize;
         if(input[i] % tableSize == key)
         {
           failures++;
@@ -189,6 +194,7 @@ int Hash::quadraticHash(int* input, int streamSize, int tableSize, char f){
   }
   return failures;   
 }
+
 int Hash::linearHash(int* input, int streamSize, int tableSize){
   int collisions = 0; 
   int hashTable[tableSize]; 
@@ -207,7 +213,7 @@ int Hash::linearHash(int* input, int streamSize, int tableSize){
       if(hashTable[j] != -1)
       {
         collisions++;
-        j = (j+1)%tableSize;  
+        j = (j+1)%tableSize;  //logic for linear hash
       }
       else
       {
@@ -248,12 +254,12 @@ void Hash::printResults() //prints the menu
   std::cout << "\nFailures Quadratic" << std::setw(2) << std::right << '|';
   for(int i = 1; i < 11; i++)
   {
-    std::cout << std::right << std::setw(5) << quadraticHash(inputStream, i*1000, getTablesize(), 'f') << std::setw(2) << std::right << '|'; 
+    std::cout << std::right << std::setw(5) << failsQuadraticHash(inputStream, i*1000, getTablesize()) << std::setw(2) << std::right << '|'; 
   }  
   std::cout << "\nFailures Double" << std::setw(5) << std::right << '|';
   for(int i = 1; i < 11; i++)
   {
-    std::cout << std::right << std::setw(5) << doubleHash(inputStream, i*1000, getTablesize(), 'f') << std::setw(2) << std::right << '|'; 
+    std::cout << std::right << std::setw(5) << failsDoubleHash(inputStream, i*1000, getTablesize()) << std::setw(2) << std::right << '|'; 
   }  
   std::cout << std::endl << std::setw(91) << std::setfill('=') << '\n'<< std::setfill(' ');
 } 
